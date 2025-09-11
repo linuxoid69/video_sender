@@ -28,10 +28,7 @@ func HandlerGetVideo(c *gin.Context) {
 		return
 	}
 
-	t := telegram.Telegram{
-		Token: os.Getenv("TG_TOKEN"),
-		Group: int64(tgGroup),
-	}
+	t := telegram.NewBot(os.Getenv("TG_TOKEN"), int64(tgGroup))
 
 	if err := t.SendVideo(video.Camera, video.Path); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
