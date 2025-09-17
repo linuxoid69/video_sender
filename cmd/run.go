@@ -8,11 +8,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use: "run",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run server")
+		fmt.Println("Run server")
 
 		ctx := context.WithoutCancel(context.Background())
 
