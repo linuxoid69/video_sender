@@ -47,7 +47,7 @@ func (t *Telegram) SendVideo(title, path string) error {
 	}
 
 	msg := tgbotapi.NewVideo(t.Group, fileBytes)
-	msg.Caption = fmt.Sprintf("#%s - file: %s, size: %dMb", title, file.Name(), fileInfo.Size()*kilobyte*kilobyte)
+	msg.Caption = fmt.Sprintf("#%s - file: %s, size: %dMb", title, file.Name(), fileInfo.Size()/kilobyte/kilobyte)
 
 	if _, err = t.Bot.Send(msg); err != nil {
 		return fmt.Errorf("error sending video: %w", err)
