@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"git.my-itclub.ru/utils/VideoSender/internal/redis"
 	"git.my-itclub.ru/utils/VideoSender/internal/telegram"
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +15,20 @@ type Video struct {
 	Camera string `json:"camera"`
 }
 
+type Handler struct {
+	redisClient *redis.Client
+}
+
+func NewHandler(rdb *redis.Client) *Handler {
+	return &Handler{redisClient: rdb}
+}
+
+func (h *Handler) AddJob(c *gin.Context) {
+	if err := h.redisClient.CreateJob(c.Request.Context(), "", ""); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+}
 func HandlerGetVideo(c *gin.Context) {
 	var video Video
 

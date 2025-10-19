@@ -32,18 +32,12 @@ func compressForTelegram(inputPath, outputPath string, targetSizeMB int) error {
 			return err
 		}
 
-		// Проверяем размер
 		if info, err := os.Stat(outputPath); err == nil {
-			// sizeMB := info.Size() / (1024 * 1024)
-			// fmt.Printf("Получился файл %dMB\n", sizeMB)
-
 			if info.Size() <= int64(targetSize) {
-				// fmt.Printf("Успех! Файл %dMB при CRF=%d\n", sizeMB, crf)
 				return nil
 			}
 		}
 
-		// Удаляем неудачную попытку
 		if err := os.Remove(outputPath); err != nil {
 			return err
 		}

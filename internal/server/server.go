@@ -9,11 +9,15 @@ import (
 	"syscall"
 	"time"
 
+	"git.my-itclub.ru/utils/VideoSender/internal/queue"
+	"git.my-itclub.ru/utils/VideoSender/internal/redis"
 	"git.my-itclub.ru/utils/VideoSender/internal/telegram"
 	"github.com/gin-gonic/gin"
 )
 
 func Run(ctx context.Context) {
+	var queueClient queue.Queuer
+
 	if err := telegram.CheckEnvVars(); err != nil {
 		fmt.Printf("Environment validation failed: %v\n", err)
 		os.Exit(1)
@@ -22,15 +26,23 @@ func Run(ctx context.Context) {
 	shutdownCtx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
+	queueClient = redis.NewClient(
+		os.Getenv("VS_REDIS_HOST"),
+		os.Getenv("VS_REDIS_PASSWD"),
+		0, 0) // TODO: Перенести все переменные окружения в общую структуру
+	handler := NewHandler(queueClient.(*redis.Client))
+
 	r := gin.Default()
+
 	r.POST("/video", HandlerGetVideo)
+	r.POST("/addjob", handler.AddJob)// TODO: добавить другие методы
 
 	srv := &http.Server{
-		Addr:    ":8090",
-		Handler: r,
-		ReadTimeout:  30 * time.Second,    // Увеличил для загрузки
-		WriteTimeout: 30 * time.Second,    // Увеличил для выгрузки
-		IdleTimeout:  120 * time.Second,   // Увеличил для долгих операций
+		Addr:         ":8090",
+		Handler:      r,
+		ReadTimeout:  30 * time.Second,  // Увеличил для загрузки
+		WriteTimeout: 30 * time.Second,  // Увеличил для выгрузки
+		IdleTimeout:  120 * time.Second, // Увеличил для долгих операций
 	}
 
 	go func() {
