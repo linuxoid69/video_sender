@@ -11,14 +11,11 @@ COPY . .
 
 RUN go build -trimpath -ldflags="-s -w" -o vs .
 
-FROM alpine:3.22.1
+FROM linuxserver/ffmpeg:version-8.0-cli
 
 WORKDIR /app
 
-RUN apk add --no-cache ca-certificates tzdata
-
-RUN addgroup -S app \
- && adduser -S -G app -H -s /sbin/nologin app
+RUN useradd -r  -s /sbin/nologin app
 
 COPY --from=builder --chown=app:app /app/vs /app/vs
 

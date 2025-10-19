@@ -3,6 +3,7 @@ package telegram
 import (
 	"fmt"
 	"os"
+	"path"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -29,8 +30,16 @@ func NewBot(token string, group int64) *Telegram {
 	}
 }
 
-func (t *Telegram) SendVideo(title, path string) error {
-	file, err := os.Open(path)
+func (t *Telegram) SendVideo(title, filePath string) error {
+	_, f := path.Split(filePath)
+	tmpPath := "/tmp/" + f
+	defer os.Remove(tmpPath)
+
+	if err := compressForTelegram(filePath, tmpPath, 9); err != nil {
+		fmt.Println("Error", err)
+	}
+
+	file, err := os.Open(tmpPath)
 	if err != nil {
 		return fmt.Errorf("error opening file: %w", err)
 	}
