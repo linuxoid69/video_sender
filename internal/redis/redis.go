@@ -49,7 +49,7 @@ func (c *Client) GetJob(ctx context.Context, key string) (string, error) {
 	return result, nil
 }
 
-func (c *Client) DeleteFJob(ctx context.Context, keys ...string) error {
+func (c *Client) DeleteJob(ctx context.Context, keys ...string) error {
 	if err := c.Ping(ctx); err != nil {
 		return err
 	}
