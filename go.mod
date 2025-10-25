@@ -3,6 +3,7 @@ module git.my-itclub.ru/utils/VideoSender
 go 1.24.3
 
 require (
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/redis/go-redis/v9 v9.14.1

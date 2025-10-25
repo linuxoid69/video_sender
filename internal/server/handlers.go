@@ -1,12 +1,12 @@
 package server
 
 import (
+	"encoding/json"
 	"net/http"
-	"os"
-	"strconv"
+	"time"
 
+	"git.my-itclub.ru/utils/VideoSender/internal/queue"
 	"git.my-itclub.ru/utils/VideoSender/internal/redis"
-	"git.my-itclub.ru/utils/VideoSender/internal/telegram"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,28 +24,23 @@ func NewHandler(rdb *redis.Client) *Handler {
 }
 
 func (h *Handler) AddJob(c *gin.Context) {
-	if err := h.redisClient.CreateJob(c.Request.Context(), "", ""); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-}
-func HandlerGetVideo(c *gin.Context) {
-	var video Video
-
-	if err := c.BindJSON(&video); err != nil {
+	var q queue.Query
+	if err := c.BindJSON(&q); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	tgGroup, err := strconv.Atoi(os.Getenv("TG_GROUP"))
+	if q.TTL != 0 {
+		h.redisClient.KeyTTL = time.Duration(q.TTL)
+	}
+
+	data, err := json.Marshal(q.Value)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	t := telegram.NewBot(os.Getenv("TG_TOKEN"), int64(tgGroup))
-
-	if err := t.SendVideo(video.Camera, video.Path); err != nil {
+	if err := h.redisClient.CreateJob(c.Request.Context(), q.Key, string(data)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

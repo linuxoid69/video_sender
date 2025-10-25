@@ -11,38 +11,41 @@ import (
 
 	"git.my-itclub.ru/utils/VideoSender/internal/queue"
 	"git.my-itclub.ru/utils/VideoSender/internal/redis"
-	"git.my-itclub.ru/utils/VideoSender/internal/telegram"
+	"git.my-itclub.ru/utils/VideoSender/internal/vars"
+	"github.com/caarlos0/env/v11"
 	"github.com/gin-gonic/gin"
 )
 
 func Run(ctx context.Context) {
 	var queueClient queue.Queuer
 
-	if err := telegram.CheckEnvVars(); err != nil {
-		fmt.Printf("Environment validation failed: %v\n", err)
+	var cfg vars.Config
+	err := env.Parse(&cfg)
+	if err != nil {
+		fmt.Println("Need set env variables")
 		os.Exit(1)
 	}
+
+	cfg, err = env.ParseAs[vars.Config]()
 
 	shutdownCtx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
-	queueClient = redis.NewClient(
-		os.Getenv("VS_REDIS_HOST"),
-		os.Getenv("VS_REDIS_PASSWD"),
-		0, 0) // TODO: Перенести все переменные окружения в общую структуру
+	queueClient = redis.NewClient(cfg.RedisHost, cfg.RedisPassword, 0, 0)
+
 	handler := NewHandler(queueClient.(*redis.Client))
+	defer handler.redisClient.RedisClient.Close()
 
 	r := gin.Default()
 
-	r.POST("/video", HandlerGetVideo)
-	r.POST("/addjob", handler.AddJob)// TODO: добавить другие методы
+	r.POST("/addjob", handler.AddJob)
 
 	srv := &http.Server{
 		Addr:         ":8090",
 		Handler:      r,
-		ReadTimeout:  30 * time.Second,  // Увеличил для загрузки
-		WriteTimeout: 30 * time.Second,  // Увеличил для выгрузки
-		IdleTimeout:  120 * time.Second, // Увеличил для долгих операций
+		ReadTimeout:  30 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
 	}
 
 	go func() {
@@ -53,10 +56,12 @@ func Run(ctx context.Context) {
 		}
 	}()
 
+	go watchJobs(ctx, cfg, queueClient)
+
 	<-shutdownCtx.Done()
 	fmt.Println("Server is shutting down...")
 
-	shutdownTimeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second) // 30 секунд для больших видео
+	shutdownTimeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownTimeoutCtx); err != nil {
