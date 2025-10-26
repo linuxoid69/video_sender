@@ -1,19 +1,24 @@
-package telegram
+package video
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 )
 
-func compressForTelegram(inputPath, outputPath string, targetSizeMB int) error {
+const (
+	AllowVideoSize int64 = 10 * 1024 * 1024
+)
+
+func VideoCompress(inputPath, outputPath string, targetSizeMB int) error {
 	targetSize := targetSizeMB * 1024 * 1024
 
 	// Начинаем с нормального качества и увеличиваем сжатие если нужно
 	crfValues := []int{35, 40, 50}
 
 	for _, crf := range crfValues {
-		fmt.Printf("Пробуем сжать с CRF=%d...\n", crf)
+		slog.Info("Try compress", "CRF", crf, "file", inputPath)
 
 		cmd := exec.Command("ffmpeg",
 			"-i", inputPath,
@@ -32,22 +37,12 @@ func compressForTelegram(inputPath, outputPath string, targetSizeMB int) error {
 			return err
 		}
 
-		// Проверяем размер
 		if info, err := os.Stat(outputPath); err == nil {
-			// sizeMB := info.Size() / (1024 * 1024)
-			// fmt.Printf("Получился файл %dMB\n", sizeMB)
-
 			if info.Size() <= int64(targetSize) {
-				// fmt.Printf("Успех! Файл %dMB при CRF=%d\n", sizeMB, crf)
 				return nil
 			}
 		}
-
-		// Удаляем неудачную попытку
-		if err := os.Remove(outputPath); err != nil {
-			return err
-		}
 	}
 
-	return fmt.Errorf("не удалось сжать до %dMB", targetSizeMB)
+	return fmt.Errorf("can't compress file for %dMB", targetSizeMB)
 }

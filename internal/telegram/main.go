@@ -3,7 +3,6 @@ package telegram
 import (
 	"fmt"
 	"os"
-	"path"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -31,15 +30,7 @@ func NewBot(token string, group int64) *Telegram {
 }
 
 func (t *Telegram) SendVideo(title, filePath string) error {
-	_, f := path.Split(filePath)
-	tmpPath := "/tmp/" + f
-	defer os.Remove(tmpPath)
-
-	if err := compressForTelegram(filePath, tmpPath, 9); err != nil {
-		fmt.Println("Error", err)
-	}
-
-	file, err := os.Open(tmpPath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return fmt.Errorf("error opening file: %w", err)
 	}
@@ -60,17 +51,6 @@ func (t *Telegram) SendVideo(title, filePath string) error {
 
 	if _, err = t.Bot.Send(msg); err != nil {
 		return fmt.Errorf("error sending video: %w", err)
-	}
-
-	return nil
-}
-
-func CheckEnvVars() error {
-	tgToken := os.Getenv("TG_TOKEN")
-	tgGroup := os.Getenv("TG_GROUP")
-
-	if tgToken == "" || tgGroup == "" {
-		return fmt.Errorf("missing environment variables")
 	}
 
 	return nil
