@@ -18,7 +18,7 @@ func VideoCompress(inputPath, outputPath string, targetSizeMB int) error {
 	crfValues := []int{35, 40, 50}
 
 	for _, crf := range crfValues {
-		slog.Info("Try compress", "CRF", crf)
+		slog.Info("Try compress", "CRF", crf, "file", inputPath)
 
 		cmd := exec.Command("ffmpeg",
 			"-i", inputPath,

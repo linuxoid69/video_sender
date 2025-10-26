@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"git.my-itclub.ru/utils/VideoSender/internal/logger"
-	"git.my-itclub.ru/utils/VideoSender/internal/server"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/logger"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/server"
 	"github.com/spf13/cobra"
 )
 

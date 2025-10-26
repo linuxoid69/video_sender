@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	"git.my-itclub.ru/utils/VideoSender/internal/queue"
-	"git.my-itclub.ru/utils/VideoSender/internal/redis"
 	"github.com/gin-gonic/gin"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/queue"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/redis"
 )
 
 type Video struct {

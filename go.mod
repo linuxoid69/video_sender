@@ -1,4 +1,4 @@
-module git.my-itclub.ru/utils/VideoSender
+module github.com/linuxoid69/video_sender/utils/VideoSender
 
 go 1.24.3
 

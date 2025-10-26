@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"git.my-itclub.ru/utils/VideoSender/internal/queue"
-	"git.my-itclub.ru/utils/VideoSender/internal/redis"
-	"git.my-itclub.ru/utils/VideoSender/internal/vars"
 	"github.com/caarlos0/env/v11"
 	"github.com/gin-gonic/gin"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/queue"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/redis"
+	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/vars"
 )
 
 func Run(ctx context.Context) {
