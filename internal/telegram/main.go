@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -29,7 +30,7 @@ func NewBot(token string, group int64) *Telegram {
 	}
 }
 
-func (t *Telegram) SendVideo(title, filePath string) (err error) {
+func (t *Telegram) SendVideo(ctx context.Context, title, filePath string) (err error) {
 	var file *os.File
 
 	file, err = os.Open(filePath)
@@ -53,8 +54,14 @@ func (t *Telegram) SendVideo(title, filePath string) (err error) {
 	msg := tgbotapi.NewVideo(t.Group, fileBytes)
 	msg.Caption = fmt.Sprintf("#%s - file: %s, size: %dMb", title, file.Name(), fileInfo.Size()/kilobyte/kilobyte)
 
-	if _, err = t.Bot.Send(msg); err != nil {
-		return fmt.Errorf("failed to send video file %s: %w", filePath, err)
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+
+		if _, err = t.Bot.Send(msg); err != nil {
+			return fmt.Errorf("failed to send video file %s: %w", filePath, err)
+		}
 	}
 
 	return nil

@@ -1,6 +1,7 @@
 package video
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -11,7 +12,7 @@ const (
 	AllowVideoSize int64 = 10 * 1024 * 1024
 )
 
-func VideoCompress(inputPath, outputPath string, targetSizeMB int) (err error) {
+func VideoCompress(ctx context.Context, inputPath, outputPath string, targetSizeMB int) (err error) {
 	targetSize := targetSizeMB * 1024 * 1024
 
 	// Начинаем с нормального качества и увеличиваем сжатие если нужно
@@ -20,7 +21,7 @@ func VideoCompress(inputPath, outputPath string, targetSizeMB int) (err error) {
 	for _, crf := range crfValues {
 		slog.Info("Try compress", "CRF", crf, "file", inputPath)
 
-		cmd := exec.Command("ffmpeg",
+		cmd := exec.CommandContext(ctx, "ffmpeg",
 			"-i", inputPath,
 			"-c:v", "libx264",
 			"-crf", fmt.Sprintf("%d", crf),
@@ -38,6 +39,7 @@ func VideoCompress(inputPath, outputPath string, targetSizeMB int) (err error) {
 		}
 
 		var fileInfo os.FileInfo
+
 		if fileInfo, err = os.Stat(outputPath); err == nil {
 			if fileInfo.Size() <= int64(targetSize) {
 				return nil
