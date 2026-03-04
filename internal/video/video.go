@@ -11,7 +11,7 @@ const (
 	AllowVideoSize int64 = 10 * 1024 * 1024
 )
 
-func VideoCompress(inputPath, outputPath string, targetSizeMB int) error {
+func VideoCompress(inputPath, outputPath string, targetSizeMB int) (err error) {
 	targetSize := targetSizeMB * 1024 * 1024
 
 	// Начинаем с нормального качества и увеличиваем сжатие если нужно
@@ -33,16 +33,17 @@ func VideoCompress(inputPath, outputPath string, targetSizeMB int) error {
 			outputPath,
 		)
 
-		if err := cmd.Run(); err != nil {
+		if err = cmd.Run(); err != nil {
 			return err
 		}
 
-		if info, err := os.Stat(outputPath); err == nil {
-			if info.Size() <= int64(targetSize) {
+		var fileInfo os.FileInfo
+		if fileInfo, err = os.Stat(outputPath); err == nil {
+			if fileInfo.Size() <= int64(targetSize) {
 				return nil
 			}
 		}
 	}
 
-	return fmt.Errorf("can't compress file for %dMB", targetSizeMB)
+	return fmt.Errorf("failed to compress file %s for %dMB", inputPath, targetSizeMB)
 }

@@ -3,44 +3,50 @@ package server
 import (
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/queue"
-	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/redis"
 )
 
-type Video struct {
-	Path   string `json:"video_path"`
-	Camera string `json:"camera"`
+type Request struct {
+	Key   string    `json:"key"`
+	TTL   int       `json:"ttl,omitempty"`
+	Value VideoData `json:"value"`
+}
+
+type VideoData struct {
+	FileSize   int64  `json:"file_size"`
+	VideoFile  string `json:"video_file"`
+	CameraName string `json:"camera_name"`
 }
 
 type Handler struct {
-	redisClient *redis.Client
+	storage Storage
 }
 
-func NewHandler(rdb *redis.Client) *Handler {
-	return &Handler{redisClient: rdb}
+func NewHandler(storage Storage) *Handler {
+	return &Handler{storage: storage}
 }
 
 func (h *Handler) AddJob(c *gin.Context) {
-	var q queue.Query
-	if err := c.BindJSON(&q); err != nil {
+	var (
+		req Request
+		err error
+	)
+
+	if err = c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if q.TTL != 0 {
-		h.redisClient.KeyTTL = time.Duration(q.TTL)
-	}
+	var data []byte
 
-	data, err := json.Marshal(q.Value)
+	data, err = json.Marshal(req.Value)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if err := h.redisClient.CreateJob(c.Request.Context(), q.Key, string(data)); err != nil {
+	if err = h.storage.Create(c.Request.Context(), req.Key, string(data)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

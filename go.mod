@@ -1,6 +1,8 @@
 module github.com/linuxoid69/video_sender/utils/VideoSender
 
-go 1.24.3
+go 1.26
+
+toolchain go1.26.0
 
 require (
 	github.com/caarlos0/env/v11 v11.3.1

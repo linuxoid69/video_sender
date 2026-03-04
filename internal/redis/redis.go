@@ -16,68 +16,68 @@ type Client struct {
 func NewClient(host, password string, db int, TTL time.Duration) *Client {
 	return &Client{
 		KeyTTL: TTL,
-		RedisClient: *redis.NewClient(&redis.Options{
-			Addr:     host,
-			Password: password,
-			DB:       db,
-		}),
+		RedisClient: *redis.NewClient(
+			&redis.Options{
+				Addr:     host,
+				Password: password,
+				DB:       db,
+			}),
 	}
 }
 
-func (c *Client) CreateJob(ctx context.Context, key string, value any) error {
-	if err := c.Ping(ctx); err != nil {
+func (c *Client) Create(ctx context.Context, key string, value any) (err error) {
+	if err = c.Ping(ctx); err != nil {
 		return err
 	}
 
-	if err := c.RedisClient.Set(ctx, key, value, c.KeyTTL).Err(); err != nil {
-		return fmt.Errorf("can't set key: %w", err)
+	if err = c.RedisClient.Set(ctx, key, value, c.KeyTTL).Err(); err != nil {
+		return fmt.Errorf("failed to set key %s with value %v: %w", key, value, err)
 	}
 
 	return nil
 }
 
-func (c *Client) GetJob(ctx context.Context, key string) (string, error) {
-	if err := c.Ping(ctx); err != nil {
+func (c *Client) Get(ctx context.Context, key string) (result string, err error) {
+	if err = c.Ping(ctx); err != nil {
 		return "", err
 	}
 
-	result, err := c.RedisClient.Get(ctx, key).Result()
+	result, err = c.RedisClient.Get(ctx, key).Result()
 	if err != nil {
-		return "", fmt.Errorf("can't get key: %w", err)
+		return "", fmt.Errorf("failed to get key %s: %w", key, err)
 	}
 
 	return result, nil
 }
 
-func (c *Client) DeleteJob(ctx context.Context, keys ...string) error {
-	if err := c.Ping(ctx); err != nil {
+func (c *Client) Delete(ctx context.Context, keys ...string) (err error) {
+	if err = c.Ping(ctx); err != nil {
 		return err
 	}
 
-	if err := c.RedisClient.Del(ctx, keys...).Err(); err != nil {
-		return fmt.Errorf("can't delete key: %w", err)
+	if err = c.RedisClient.Del(ctx, keys...).Err(); err != nil {
+		return fmt.Errorf("failed to delete key %s: %w", keys, err)
 	}
 
 	return nil
 }
 
-func (c *Client) GetKeys(ctx context.Context, pattern string) ([]string, error) {
-	if err := c.Ping(ctx); err != nil {
+func (c *Client) Keys(ctx context.Context, pattern string) (allKeys []string, err error) {
+	if err = c.Ping(ctx); err != nil {
 		return nil, err
 	}
 
-	keys := c.RedisClient.Keys(ctx, pattern)
-	allKeys, err := keys.Result()
+	allKeys, err = c.RedisClient.Keys(ctx, pattern).Result()
 	if err != nil {
-		return nil, fmt.Errorf("can't get keys: %w", err)
+		return nil, fmt.Errorf("failed to get keys by pattern %s: %w", pattern, err)
 	}
 
 	return allKeys, nil
 }
 
-func (c *Client) Ping(ctx context.Context) error {
-	if _, err := c.RedisClient.Ping(ctx).Result(); err != nil {
-		return fmt.Errorf("can't to connect redis: %w", err)
+func (c *Client) Ping(ctx context.Context) (err error) {
+	if _, err = c.RedisClient.Ping(ctx).Result(); err != nil {
+		return fmt.Errorf("failed to connect redis: %w", err)
 	}
 
 	return nil
