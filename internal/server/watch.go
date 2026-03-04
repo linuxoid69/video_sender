@@ -58,7 +58,7 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 				if vd.FileSize > video.AllowVideoSize {
 					_, fileName := path.Split(vd.VideoFile)
 
-					if err := video.VideoCompress(vd.VideoFile, DefaultTMPDir+fileName, DefaultCompressSizeMB); err != nil {
+					if err := video.VideoCompress(ctx, vd.VideoFile, DefaultTMPDir+fileName, DefaultCompressSizeMB); err != nil {
 						slog.Warn("failed to compress file", "file", vd.VideoFile, "error", err)
 
 						continue
