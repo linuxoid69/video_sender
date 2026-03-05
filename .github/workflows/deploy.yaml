@@ -1,5 +1,5 @@
 name: Push docker image
-# run-name: ${{ github.actor }} triggered build or push
+run-name: ${{ github.actor }} triggered build or push
 on:
   workflow_dispatch:
 
@@ -9,12 +9,9 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
-
       - name: Push image if requested
-        if: ${{ github.event.inputs.push_image == 'true' }}
         env:
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
         run: |
           make push
-
