@@ -1,7 +1,7 @@
 name: Build and Push Docker Image
 run-name: ${{ github.actor }} triggered build or push
 on:
-  push:
+  # push:
   workflow_dispatch:
     inputs:
       push_image:
