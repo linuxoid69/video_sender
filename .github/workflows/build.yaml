@@ -1,15 +1,7 @@
-name: Build and Push Docker Image (test)
-# run-name: ${{ github.actor }} triggered build or push
+name: Build Docker Image
+run-name: ${{ github.actor }} triggered build or push
 on:
-  # push:
-
-  workflow_dispatch:
-    # inputs:
-    #   push_image:
-    #     description: 'Push image to registry?'
-    #     required: false
-    #     type: boolean
-    #     default: false
+  push:
 
 jobs:
   build:
@@ -21,11 +13,3 @@ jobs:
       - name: Build image locally
         run: |
           make build
-
-      - name: Push image if requested
-        if: ${{ github.event.inputs.push_image == 'true' }}
-        env:
-          DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
-          DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        run: |
-          make push
