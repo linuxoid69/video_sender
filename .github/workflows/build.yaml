@@ -9,6 +9,14 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
+
       - name: Build image locally
         run: |
-          make build
+          make build-save
+
+      - name: Upload image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: video_sender_docker_image
+          path: video_sender.tar
+          retention-days: 1
