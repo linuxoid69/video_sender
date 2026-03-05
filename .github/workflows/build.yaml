@@ -1,14 +1,14 @@
 name: Build and Push Docker Image
 run-name: ${{ github.actor }} triggered build or push
 on:
-  # push:
+  push:
   workflow_dispatch:
-    inputs:
-      push_image:
-        description: 'Push image to registry?'
-        required: false
-        type: boolean
-        default: false
+    # inputs:
+    #   push_image:
+    #     description: 'Push image to registry?'
+    #     required: false
+    #     type: boolean
+    #     default: false
 
 jobs:
   build:
