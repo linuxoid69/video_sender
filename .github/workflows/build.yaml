@@ -22,6 +22,7 @@ jobs:
           make build
 
       - name: Push image if requested
+        if: ${{ github.event.inputs.push_image == 'true' }}
         env:
           DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
