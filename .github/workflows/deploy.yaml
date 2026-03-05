@@ -17,3 +17,4 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKER_USER }}
         run: |
           make push
+
