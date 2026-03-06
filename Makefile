@@ -20,7 +20,7 @@ build:
 	docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
 
 push:
-    docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
+	docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
 	docker push $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG)
 	docker push $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
 
