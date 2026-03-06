@@ -1,4 +1,4 @@
-name: Build Docker Image
+name: Docker Build and Push
 run-name: ${{ github.actor }} triggered build or push
 on:
   push:
@@ -12,11 +12,4 @@ jobs:
 
       - name: Build image locally
         run: |
-          make build-save
-
-      - name: Upload image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: video_sender_docker_image
-          path: video_sender.tar
-          retention-days: 1
+          make build

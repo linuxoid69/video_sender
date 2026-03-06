@@ -1,7 +1,6 @@
 name: Docker Build and Push
 run-name: ${{ github.actor }} triggered build or push
 on:
-  push:
   workflow_dispatch:
 
 jobs:
