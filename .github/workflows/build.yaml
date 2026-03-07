@@ -1,5 +1,5 @@
 name: Docker Build
-run-name: ${{ github.actor }} triggered build or push
+run-name: ${{ github.actor }} triggered build
 on:
   push:
 
