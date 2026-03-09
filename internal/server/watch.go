@@ -20,9 +20,8 @@ const (
 )
 
 func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
-	var tmpVideoFile string
-
 	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
 
 	for {
 		select {
@@ -38,6 +37,7 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 			slices.Sort(keys)
 
 			for _, key := range keys {
+				var tmpVideoFile string
 				res, err := s.Get(ctx, key)
 				if err != nil {
 					slog.Error("failed to get key", "error", err, "key", key)
