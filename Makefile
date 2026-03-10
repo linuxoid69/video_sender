@@ -2,8 +2,8 @@
 
 APP=video_sender
 GROUP=linuxoid69
-REVISION=-4
-VERSION=0.4.0
+REVISION=-1
+VERSION=0.5.0
 TAG=$(VERSION)$(REVISION)
 DOCKER_REGISTRY=ghcr.io
 
@@ -20,7 +20,7 @@ build:
 	docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
 
 push:
-    docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
+	docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
 	docker push $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG)
 	docker push $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
 
@@ -30,4 +30,4 @@ build-save:
 		--platform linux/amd64 \
 		-t $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) .
 	docker tag $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) $(DOCKER_REGISTRY)/$(GROUP)/$(APP):latest
-	docker save $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) -o video_sender.tar
+	docker save $(DOCKER_REGISTRY)/$(GROUP)/$(APP):$(TAG) -o $(APP).tar

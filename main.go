@@ -1,7 +1,16 @@
 package main
 
-import "github.com/linuxoid69/video_sender/utils/VideoSender/cmd"
+import (
+	"os"
+
+	"github.com/linuxoid69/video_sender/utils/VideoSender/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	rootCmd := cmd.RootCmd()
+	rootCmd.AddCommand(cmd.RunCmd(nil, nil))
+
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

@@ -9,18 +9,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var runCmd = &cobra.Command{
-	Use:              "run",
-	PersistentPreRun: func(cmd *cobra.Command, args []string) { logger.InitLogger() },
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Run server")
+func RunCmd(_ *cobra.Command, _ []string) *cobra.Command {
+	return &cobra.Command{
+		Use:              "run",
+		PersistentPreRun: func(_ *cobra.Command, _ []string) { logger.InitLogger() },
+		Run: func(_ *cobra.Command, _ []string) {
+			fmt.Println("Run server")
 
-		ctx := context.WithoutCancel(context.Background())
+			ctx := context.WithoutCancel(context.Background())
 
-		server.Run(ctx)
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(runCmd)
+			server.Run(ctx)
+		},
+	}
 }

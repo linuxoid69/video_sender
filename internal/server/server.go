@@ -11,18 +11,26 @@ import (
 
 	"github.com/caarlos0/env/v11"
 	"github.com/gin-gonic/gin"
-	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/queue"
+
 	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/redis"
 	"github.com/linuxoid69/video_sender/utils/VideoSender/internal/vars"
 )
 
-func Run(ctx context.Context) {
-	var queueClient queue.Queuer
+type Storage interface {
+	Create(ctx context.Context, key string, value any) error
+	Get(ctx context.Context, key string) (string, error)
+	Delete(ctx context.Context, keys ...string) error
+	Keys(ctx context.Context, pattern string) ([]string, error)
+}
 
-	var cfg vars.Config
-	err := env.Parse(&cfg)
-	if err != nil {
-		fmt.Println("Need set env variables")
+func Run(ctx context.Context) {
+	var (
+		cfg vars.Config
+		err error
+	)
+
+	if err = env.Parse(&cfg); err != nil {
+		fmt.Printf("Error %v\n", err)
 		os.Exit(1)
 	}
 
@@ -31,13 +39,12 @@ func Run(ctx context.Context) {
 	shutdownCtx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
-	queueClient = redis.NewClient(cfg.RedisHost, cfg.RedisPassword, 0, 0)
+	rc := redis.NewClient(cfg.RedisHost, cfg.RedisPassword, 0, 0)
 
-	handler := NewHandler(queueClient.(*redis.Client))
-	defer handler.redisClient.RedisClient.Close()
+	handler := NewHandler(rc)
+	defer rc.RedisClient.Close()
 
 	r := gin.Default()
-
 	r.POST("/addjob", handler.AddJob)
 
 	srv := &http.Server{
@@ -56,15 +63,16 @@ func Run(ctx context.Context) {
 		}
 	}()
 
-	go watchJobs(ctx, cfg, queueClient)
+	go watchJobs(ctx, cfg, rc)
 
 	<-shutdownCtx.Done()
+
 	fmt.Println("Server is shutting down...")
 
 	shutdownTimeoutCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := srv.Shutdown(shutdownTimeoutCtx); err != nil {
+	if err = srv.Shutdown(shutdownTimeoutCtx); err != nil {
 		fmt.Printf("Server shutdown failed: %v\n", err)
 		os.Exit(1)
 	}
