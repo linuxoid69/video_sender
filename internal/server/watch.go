@@ -60,15 +60,11 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 
 					if err := video.VideoCompress(ctx, vd.VideoFile, DefaultTMPDir+fileName, DefaultCompressSizeMB); err != nil {
 						slog.Warn("failed to compress file", "file", vd.VideoFile, "error", err)
-
-						continue
+					} else {
+						slog.Info("Finish compress file", "file", vd.VideoFile)
+						outFile = DefaultTMPDir + fileName
+						tmpVideoFile = outFile
 					}
-
-					slog.Info("Finish compress file", "file", vd.VideoFile)
-
-					outFile = DefaultTMPDir + fileName
-					tmpVideoFile = outFile
-
 				}
 
 				slog.Info("Start send file", "file", outFile)
