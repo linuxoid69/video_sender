@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	AllowVideoSize int64 = 10 * 1024 * 1024
+	AllowVideoSize    int64 = 10 * 1024 * 1024
+	AllowMaxVideoSize int64 = 50 * 1024 * 1024
 )
 
 func VideoCompress(ctx context.Context, inputPath, outputPath string, targetSizeMB int) (err error) {

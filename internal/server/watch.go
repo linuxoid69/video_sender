@@ -67,6 +67,16 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 					}
 				}
 
+				if vd.FileSize > video.AllowMaxVideoSize {
+					slog.Warn("File is very big and was skipped", "file", vd.VideoFile, "size", vd.FileSize)
+
+					if err = s.Delete(ctx, key); err != nil {
+						slog.Error("failed to delete key", "key", key, "error", err)
+
+						continue
+					}
+				}
+
 				slog.Info("Start send file", "file", outFile)
 
 				if err = telegram.NewBot(cfg.TelegramToken, cfg.TelegramGroup).
