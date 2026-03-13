@@ -75,6 +75,7 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 
 						continue
 					}
+					continue
 				}
 
 				slog.Info("Start send file", "file", outFile)
