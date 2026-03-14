@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path"
@@ -72,6 +73,14 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 
 					if err = s.Delete(ctx, key); err != nil {
 						slog.Error("failed to delete key", "key", key, "error", err)
+
+						continue
+					}
+
+					msg := fmt.Sprintf("#%s\nfile: %s\nsize: %d\n", vd.CameraName, vd.VideoFile, vd.FileSize)
+					if err = telegram.NewBot(cfg.TelegramToken, cfg.TelegramGroup).
+						SendMessage(ctx, msg); err != nil {
+						slog.Error("failed to send video file", "file", vd.VideoFile, "error", err)
 
 						continue
 					}
