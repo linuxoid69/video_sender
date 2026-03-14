@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 	"os"
 	"path"
@@ -60,15 +61,30 @@ func watchJobs(ctx context.Context, cfg vars.Config, s Storage) {
 
 					if err := video.VideoCompress(ctx, vd.VideoFile, DefaultTMPDir+fileName, DefaultCompressSizeMB); err != nil {
 						slog.Warn("failed to compress file", "file", vd.VideoFile, "error", err)
+					} else {
+						slog.Info("Finish compress file", "file", vd.VideoFile)
+						outFile = DefaultTMPDir + fileName
+						tmpVideoFile = outFile
+					}
+				}
+
+				if vd.FileSize > video.AllowMaxVideoSize {
+					slog.Warn("File is very big and was skipped", "file", vd.VideoFile, "size", vd.FileSize)
+
+					if err = s.Delete(ctx, key); err != nil {
+						slog.Error("failed to delete key", "key", key, "error", err)
 
 						continue
 					}
 
-					slog.Info("Finish compress file", "file", vd.VideoFile)
+					msg := fmt.Sprintf("#%s\nfile: %s\nsize: %d\n", vd.CameraName, vd.VideoFile, vd.FileSize)
+					if err = telegram.NewBot(cfg.TelegramToken, cfg.TelegramGroup).
+						SendMessage(ctx, msg); err != nil {
+						slog.Error("failed to send video file", "file", vd.VideoFile, "error", err)
 
-					outFile = DefaultTMPDir + fileName
-					tmpVideoFile = outFile
-
+						continue
+					}
+					continue
 				}
 
 				slog.Info("Start send file", "file", outFile)

@@ -66,3 +66,20 @@ func (t *Telegram) SendVideo(ctx context.Context, title, filePath string) (err e
 
 	return nil
 }
+
+func (t *Telegram) SendMessage(ctx context.Context, text string) (err error) {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		msg := tgbotapi.MessageConfig{
+			Text: text,
+		}
+
+		if _, err = t.Bot.Send(msg); err != nil {
+			return fmt.Errorf("failed to send messege: %w", err)
+		}
+	}
+
+	return nil
+}
